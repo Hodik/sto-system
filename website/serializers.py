@@ -77,3 +77,64 @@ class StoSerializer(Serializer):
         fields = '__all__'
 
 
+from abc import ABC, abstractmethod
+from dict2xml import dict2xml
+import yaml
+
+
+class FormatSerializer(ABC):
+
+    @abstractmethod
+    def set_object(self, obj): ...
+
+    @abstractmethod
+    def to_str(self): ...
+
+class JsonSerializer(FormatSerializer):
+    def __init__(self):
+        self._current_object = None
+
+    def set_object(self, obj):
+        self._current_object = obj
+
+    def to_str(self):
+        return json.dumps(self._current_object)
+
+class XMLSerializer(FormatSerializer):
+    def __init__(self):
+        self._current_object = None
+
+    def set_object(self, obj):
+        self._current_object = obj
+
+    def to_str(self):
+        print(self._current_object)
+        return dict2xml(self._current_object)
+
+class YamlSerializer(XMLSerializer):
+    def to_str(self):
+        return yaml.dump(self._current_object)
+
+class FormatFactory:
+    def __init__(self):
+        self._creators = {}
+
+    def register_creator(self, name, creator):
+        self._creators[name] = creator
+
+    def get_serializer(self, name):
+        creator = self._creators.get(name)
+        if not creator:
+            raise ValueError(name)
+        return creator()
+
+format_factory = FormatFactory()
+format_factory.register_creator('Json', JsonSerializer)
+format_factory.register_creator('XML', XMLSerializer)
+format_factory.register_creator('YAML', YamlSerializer)
+
+class ObjectSerializer:
+    def serialize(self, serializable, format: str):
+        serializer = format_factory.get_serializer(format)
+        serializer.set_object(serializable)
+        return serializer.to_str()
