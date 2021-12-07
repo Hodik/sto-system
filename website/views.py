@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from django.http import JsonResponse
+from django.http import HttpResponse, JsonResponse
 from website.models import *
 from django.views.decorators.http import require_http_methods
 from django.views.decorators.csrf import csrf_exempt
@@ -8,7 +8,9 @@ import json
 from website.serializers import *
 @require_http_methods(["GET"])
 def get_sto(request):
-    return JsonResponse(StoSerializer(Sto.objects.all(), many=True).serialized, safe=False)
+    if request.GET.get("format"):
+        serializable = StoSerializer(Sto.objects.all(), many=True).serialized
+        return HttpResponse(ObjectSerializer().serialize(serializable, request.GET.get("format")))
 
 @csrf_exempt
 @require_http_methods(["POST"])
