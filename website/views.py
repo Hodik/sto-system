@@ -36,12 +36,48 @@ def require_http_methods(request_method_list):
         return inner
     return decorator
 
-
+@csrf_exempt
 @require_http_methods(["GET"])
 def get_sto(request):
     if request.GET.get("format"):
         serializable = StoSerializer(Sto.objects.all(), many=True).serialized
         return HttpResponse(ObjectSerializer().serialize(serializable, request.GET.get("format")))
+
+class MonthYearIterator:
+    
+    def __init__(self):
+        self._years = [2019, 2020, 2021, 2022]
+        self._months = ['apr', 'jun', 'jul', 'aug']
+        self._years_counter = 0
+        self._months_counter = 0
+
+    def __iter__(self):
+        return self
+    
+    def __next__(self):
+        rv: str = [self._years[self._years_counter], self._months[self._months_counter]]
+        if self._months_counter == len(self._months) - 1 and self._years_counter == len(self._years) - 1:
+            raise StopIteration("stop")
+        elif self._months_counter == len(self._months) - 1: 
+            self._years_counter += 1
+            self._months_counter = 0
+        else:
+            self._months_counter += 1
+        return rv
+
+
+@csrf_exempt
+@require_http_methods(["GET"])
+def get_month_year(request):
+    rv = []
+    iter = MonthYearIterator()
+    while True:
+        try: 
+            rv.append(next(iter))
+        except StopIteration:
+            break
+    return JsonResponse({"data": rv})
+
 
 @csrf_exempt
 @require_http_methods(["POST"])
