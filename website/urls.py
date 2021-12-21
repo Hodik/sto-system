@@ -1,8 +1,7 @@
 from django.urls import path, include
-from website.views import get_sto, put_sto, get_month_year
-
+from website.views import *
 urlpatterns = [
-    path('sto/', get_sto),
-    path('create-sto/', put_sto),
-    path('test/', get_month_year),
+    path('stos/', StoList.as_view()),
+    path('stos/<int:pk>', StoDetail.as_view()),
+    path('review/', ReviewList.as_view()),
 ]

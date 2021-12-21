@@ -2,8 +2,9 @@ from django.db.models import fields
 from website.models import *
 from typing import Union
 import json
+from rest_framework import serializers
 
-class Serializer:
+"""class Serializer:
 
     def __init__(self, obj, many: bool = False) -> Union[list, dict]:
 
@@ -74,8 +75,17 @@ class StoSerializer(Serializer):
 
     class Meta:
         model = Sto
+        fields = '__all__'"""
+
+class StoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Sto
         fields = '__all__'
 
+class ReviewSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Review
+        fields = '__all__'
 
 from abc import ABC, abstractmethod
 from dict2xml import dict2xml
